@@ -1,8 +1,10 @@
 # shared helpers (source from code/)
+# set COMPOSE_FILE=docker-compose.m3.yml and LAB_NET=10.20 to use the second lab copy
 # interface of the router on the client network / server network (Docker does not fix the order)
 rif() { docker compose exec -T router sh -c "ip -o -4 addr show | awk '/ $1\\//{print \$2}'"; }
-RIF_CLIENT=$(rif 10.10.1.254)
-RIF_SERVER=$(rif 10.10.2.254)
+LAB_NET=${LAB_NET:-10.10}   # 10.20 for docker-compose.m3.yml
+RIF_CLIENT=$(rif $LAB_NET.1.254)
+RIF_SERVER=$(rif $LAB_NET.2.254)
 
 # netem on both router interfaces: RTT/2 each way, same loss each way, 50 Mbit/s bottleneck
 set_netem() {  # $1 = RTT in ms, $2 = loss in %

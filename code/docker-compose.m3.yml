@@ -1,0 +1,54 @@
+# Second copy of the lab (networks 10.20.x) so M3/M4 can run while the M2
+# campaign uses the main lab. Same images and content as docker-compose.yml.
+name: quiclab-m3
+
+networks:
+  clientnet:
+    ipam:
+      config: [{ subnet: 10.20.1.0/24 }]
+  servernet:
+    ipam:
+      config: [{ subnet: 10.20.2.0/24 }]
+
+services:
+  router:
+    build: ./router
+    hostname: router
+    cap_add: [NET_ADMIN, NET_RAW]
+    sysctls:
+      net.ipv4.ip_forward: "1"
+    networks:
+      clientnet: { ipv4_address: 10.20.1.254 }
+      servernet: { ipv4_address: 10.20.2.254 }
+    volumes: ["../results:/results"]
+    command: ["sleep", "infinity"]
+
+  server:
+    build: ./server
+    hostname: server
+    cap_add: [NET_ADMIN]
+    networks:
+      servernet: { ipv4_address: 10.20.2.10 }
+    volumes:
+      - "./certs:/certs:ro"
+      - "./server/www:/srv/www:ro"
+      - "../results/m3/server-logs:/var/log/nginx"
+    # route to the client network through the router, then start nginx
+    command: ["sh", "-c", "ip route add 10.20.1.0/24 via 10.20.2.254 && exec nginx -g 'daemon off;'"]
+
+  client:
+    build: ./client
+    hostname: client
+    cap_add: [NET_ADMIN]
+    # shares the server's PID namespace (not its network) so the M2 runner
+    # can read the nginx worker CPU time from /proc
+    pid: "service:server"
+    depends_on: [server]
+    networks:
+      clientnet: { ipv4_address: 10.20.1.10 }
+    extra_hosts: ["server.lab:10.20.2.10"]
+    volumes:
+      - "./certs/ca.crt:/certs/ca.crt:ro"
+      - "./scripts:/scripts:ro"
+      - "../results:/results"
+    command: ["sh", "-c", "ip route add 10.20.2.0/24 via 10.20.1.254 && exec sleep infinity"]
