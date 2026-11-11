@@ -67,7 +67,8 @@ difference measured in M2 for the small object (median ratio 0.68).
 3. **TCP gives the operator RTT, loss and end of connection for free. QUIC gives none of these
    after the handshake.** The spin bit would give RTT, but neither curl/ngtcp2 nor nginx turned
    it on (RFC 9000 §17.4 makes it optional, and even when used it must be disabled on at least one in
-   every 16 paths or connection IDs). This supports H2 from report 1, except that we had expected to see the spin bit.
+   every 16 paths or connection IDs). This confirms H2 from report 1: the observer gets server name, ALPN, version,
+   connection IDs, sizes, timing and a handshake RTT, and nothing about loss or RTT later on.
 4. **Connection IDs are a new identifier that TCP does not have.** They allow an observer to
    link packets of one connection even if the 4-tuple changes. This is the reason for the
    rules on CID rotation after migration, which M4 tests.
