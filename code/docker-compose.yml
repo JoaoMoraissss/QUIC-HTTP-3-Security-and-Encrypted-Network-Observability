@@ -1,0 +1,50 @@
+# Lab for Assignment #2: client <-> router <-> server, two separate networks.
+# All client/server traffic crosses the router, where netem and tcpdump run.
+name: quiclab
+
+networks:
+  clientnet:
+    ipam:
+      config: [{ subnet: 10.10.1.0/24 }]
+  servernet:
+    ipam:
+      config: [{ subnet: 10.10.2.0/24 }]
+
+services:
+  router:
+    build: ./router
+    hostname: router
+    cap_add: [NET_ADMIN, NET_RAW]
+    sysctls:
+      net.ipv4.ip_forward: "1"
+    networks:
+      clientnet: { ipv4_address: 10.10.1.254 }
+      servernet: { ipv4_address: 10.10.2.254 }
+    volumes: ["../results:/results"]
+    command: ["sleep", "infinity"]
+
+  server:
+    build: ./server
+    hostname: server
+    cap_add: [NET_ADMIN]
+    networks:
+      servernet: { ipv4_address: 10.10.2.10 }
+    volumes:
+      - "./certs:/certs:ro"
+      - "./server/www:/srv/www:ro"
+      - "../results/server-logs:/var/log/nginx"
+    # route to the client network through the router, then start nginx
+    command: ["sh", "-c", "ip route add 10.10.1.0/24 via 10.10.2.254 && exec nginx -g 'daemon off;'"]
+
+  client:
+    build: ./client
+    hostname: client
+    cap_add: [NET_ADMIN]
+    networks:
+      clientnet: { ipv4_address: 10.10.1.10 }
+    extra_hosts: ["server.lab:10.10.2.10"]
+    volumes:
+      - "./certs/ca.crt:/certs/ca.crt:ro"
+      - "./scripts:/scripts:ro"
+      - "../results:/results"
+    command: ["sh", "-c", "ip route add 10.10.2.0/24 via 10.10.1.254 && exec sleep infinity"]

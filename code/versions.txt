@@ -1,0 +1,10 @@
+# generated 2026-11-11 by scripts/versions.sh
+host kernel: 7.2.11-1-cachyos
+docker: 29.9.1
+nginx version: nginx/1.31.8
+built with OpenSSL 3.5.9
+curl 8.23.0 (x86_64-pc-linux-gnu) libcurl/8.23.0 OpenSSL/4.1.0 zlib/1.4 brotli/1.2.1 zstd/1.5.7 libidn2/2.3.8 libpsl/0.21.5 libssh2/1.11.1 nghttp2/1.71.0 ngtcp2/1.26.0 nghttp3/1.19.0 mit-krb5/1.22.2
+aioquic 1.2.0
+TShark (Wireshark) 4.7.4.
+tcpdump version 4.99.7
+tc utility, iproute2-7.3.0, libbpf 1.8.0
