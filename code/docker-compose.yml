@@ -40,6 +40,10 @@ services:
     build: ./client
     hostname: client
     cap_add: [NET_ADMIN]
+    # shares the server's PID namespace (not its network) so the M2 runner
+    # can read the nginx worker CPU time from /proc
+    pid: "service:server"
+    depends_on: [server]
     networks:
       clientnet: { ipv4_address: 10.10.1.10 }
     extra_hosts: ["server.lab:10.10.2.10"]

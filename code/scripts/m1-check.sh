@@ -4,12 +4,13 @@
 # Run from code/ with the lab up.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+source scripts/lib.sh
 OUT=/results/m1
 docker compose exec -T router sh -c "mkdir -p $OUT && rm -f $OUT/*"
 docker compose exec -T client sh -c "mkdir -p $OUT/qlog"
 
 # capture on the client-side interface of the router (what a passive observer sees)
-docker compose exec -d router tcpdump -i eth0 -s 0 -U -w $OUT/m1.pcap 'host 10.10.1.10 and port 443'
+docker compose exec -d router tcpdump -i $RIF_CLIENT -s 0 -U -w $OUT/m1.pcap 'host 10.10.1.10 and port 443'
 sleep 1
 
 for proto in http2 http3-only; do
