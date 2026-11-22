@@ -1,0 +1,9 @@
+# Override for M4, on top of the second lab copy:
+#   COMPOSE_FILE=docker-compose.m3.yml:docker-compose.m4.yml
+# nginx with 0-RTT enabled and the debug binary/log. nginx.conf (M1–M3) is unchanged.
+services:
+  server:
+    volumes:
+      - "./server/nginx-m4.conf:/etc/nginx/nginx.conf:ro"
+      - "./server/m4-extra:/etc/nginx/m4-extra:ro"
+    command: ["sh", "-c", "ip route add 10.20.1.0/24 via 10.20.2.254 && exec nginx-debug -g 'daemon off;'"]

@@ -14,6 +14,8 @@ if [ ! -f certs/server.crt ]; then
     -CAcreateserial -days 365 -out certs/server.crt \
     -extfile <(printf "subjectAltName=DNS:server.lab\nextendedKeyUsage=serverAuth")
   chmod 644 certs/server.key   # nginx in the container reads it as another user
+  # M4: key for QUIC tokens (Retry/NEW_TOKEN), shared by all nginx workers
+  openssl rand 32 > certs/quic_host.key; chmod 644 certs/quic_host.key
 fi
 
 # workloads: one small page, one 10 MB object, fifty small objects

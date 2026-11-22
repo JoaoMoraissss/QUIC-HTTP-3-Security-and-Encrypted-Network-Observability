@@ -47,9 +47,9 @@ Results (captures, TLS keys, qlog, server logs) go to `results/`, which is not v
 | Milestone | State |
 |---|---|
 | M1 Lab setup | done 2026-11-11 — same URL over H2 and H3, confirmed in the capture and the server log |
-| M2 Performance (netem, 3 workloads) | to do |
-| M3 Wire image (annotated captures) | to do |
-| M4 Migration / NAT rebinding, 0-RTT | to do |
+| M2 Performance (netem, 3 workloads) | done 2026-11-11 — `code/scripts/m2-all.sh`, figures in report 2 |
+| M3 Wire image (annotated captures) | done 2026-11-11 — `docs/m3-wire-image.md` |
+| M4 Migration / NAT rebinding, 0-RTT | done 2026-11-22 — `docs/m4-migration.md` |
 | M5 Observability | to do |
 | M6 Robustness (aioquic) | to do |
 | M7 Report 2, packaging | to do |
