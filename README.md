@@ -71,6 +71,12 @@ selection of `results/` (M1–M3, M2 CSVs, M4 text files and 0-RTT captures, M5 
 10 MB downloads, M6 measurements). The full results (~800 MB, mostly M4 rebinding captures)
 are not included; `results/SHA256SUMS` lists every file of the full set with its hash.
 
+Full results: <https://drive.google.com/open?id=1aj0-3rNFs3lf-PxKW9lJ01MZoFud6N-H>
+(`TP1_group10_results_full.tar.gz`, 626 MB, SHA-256
+`1cd5bd26b38b16a46310028df892e95730662545978b76b85860160e99ff12b9`).
+Check with `sha256sum -c TP1_group10_results_full.tar.gz.sha256`, then
+`tar -xzf TP1_group10_results_full.tar.gz && cd results && sha256sum -c SHA256SUMS`.
+
 ## Test content (`code/server/www/`, generated)
 
 | Workload | Files |
