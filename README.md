@@ -51,5 +51,5 @@ Results (captures, TLS keys, qlog, server logs) go to `results/`, which is not v
 | M3 Wire image (annotated captures) | done 2026-11-11 — `docs/m3-wire-image.md` |
 | M4 Migration / NAT rebinding, 0-RTT | done 2026-11-22 — `docs/m4-migration.md` |
 | M5 Observability | done 2026-11-22 — `docs/m5-observability.md` |
-| M6 Robustness (aioquic) | to do |
+| M6 Robustness (aioquic) | done 2026-11-22 — `docs/m6-robustness.md` |
 | M7 Report 2, packaging | to do |
