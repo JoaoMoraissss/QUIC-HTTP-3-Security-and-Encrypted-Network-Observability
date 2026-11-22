@@ -23,16 +23,53 @@ Exact versions are in `code/versions.txt` (`code/scripts/versions.sh` regenerate
 ## Reproducing
 
 Requirements: Linux, Docker with Compose, openssl. No root is needed beyond Docker access.
+Every script is run from `code/`.
 
 ```sh
 cd code
-./scripts/setup.sh          # lab CA, server certificate, test content
+./scripts/setup.sh          # lab CA, server certificate, QUIC token key, test content
+
+# main lab (10.10.x): M1 and M2
 docker compose up -d --build
 ./scripts/m1-check.sh       # M1: same URL over HTTP/2 and HTTP/3, checked in the capture
-docker compose down         # stop the lab
+./scripts/m2-all.sh         # M2: netem grid, 3 workloads (~4 h, resumable; log in results/m2)
+docker compose down
+
+# second lab copy (10.20.x) with the M4 nginx configuration (0-RTT, debug log)
+export COMPOSE_FILE=docker-compose.m3.yml:docker-compose.m4.yml
+docker compose up -d --build
+./scripts/m3-capture.sh && ./scripts/m3-annotate.sh   # M3: annotated H2/H3 captures
+./scripts/m4-rebind.sh      # M4: NAT rebinding, H3 and H2 (REPS=n, REBIND_AT=none for a baseline)
+./scripts/m4-zerortt.sh     # M4: 0-RTT timings and replay (MODES="plain retry tooearly")
+./scripts/m5-events.sh      # M5: observability events
+
+# M6: three local aioquic servers (1.0.0, 1.2.0, 1.8.0), 1 GB memory each
+export COMPOSE_FILE=docker-compose.m3.yml:docker-compose.m6.yml
+docker compose up -d --build aq100 aq120 aq180
+./scripts/m6-run.sh         # malformed frames + CRYPTO / PATH_CHALLENGE floods (SECS=60)
+docker compose stop aq100 aq120 aq180
 ```
 
-Results (captures, TLS keys, qlog, server logs) go to `results/`, which is not versioned.
+Figures: `.venv/bin/python code/scripts/report_figs.py results/m2 <dir>` (M2) and
+`code/scripts/m6_plot.py results/m6 <dir>` (M6). The analysis of each milestone is in
+`docs/` (`m3-wire-image.md`, `m4-migration.md`, `m5-observability.md`, `m6-robustness.md`).
+
+Notes:
+
+- Results (captures, TLS keys, qlog, server logs) go to `results/`. Files written by the
+  containers belong to root; remove them through a container, e.g.
+  `docker compose exec router rm -rf /results/m4/rebind-h3-4-1`.
+- Do not use `nginx -s reload` between M4 runs: the old worker keeps part of the new QUIC
+  connections (reuseport). The scripts recreate the server container instead.
+- The client and the server share a PID namespace (the M2 runner reads the nginx worker CPU
+  time), so recreating the server also needs the client: `docker compose up -d --force-recreate server client`.
+
+## Submission (`TP1_group10.zip`)
+
+Built by `code/scripts/package.sh`: this README, `code/`, `docs/`, the two report PDFs and a
+selection of `results/` (M1–M3, M2 CSVs, M4 text files and 0-RTT captures, M5 without the two
+10 MB downloads, M6 measurements). The full results (~800 MB, mostly M4 rebinding captures)
+are not included; `results/SHA256SUMS` lists every file of the full set with its hash.
 
 ## Test content (`code/server/www/`, generated)
 
@@ -52,4 +89,4 @@ Results (captures, TLS keys, qlog, server logs) go to `results/`, which is not v
 | M4 Migration / NAT rebinding, 0-RTT | done 2026-11-22 — `docs/m4-migration.md` |
 | M5 Observability | done 2026-11-22 — `docs/m5-observability.md` |
 | M6 Robustness (aioquic) | done 2026-11-22 — `docs/m6-robustness.md` |
-| M7 Report 2, packaging | to do |
+| M7 Report 2, packaging | done 2026-11-22 — report 2 and `code/scripts/package.sh` |
