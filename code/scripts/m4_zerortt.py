@@ -17,6 +17,7 @@ from aioquic.asyncio.protocol import QuicConnectionProtocol
 from aioquic.h3.connection import H3_ALPN, H3Connection
 from aioquic.h3.events import DataReceived, HeadersReceived
 from aioquic.quic.configuration import QuicConfiguration
+from aioquic.quic.logger import QuicFileLogger
 
 
 class Client(QuicConnectionProtocol):
@@ -66,6 +67,8 @@ async def main(a):
                             server_name=u.hostname, cafile=a.cafile)
     if a.keylog:
         cfg.secrets_log_file = open(a.keylog, "a")
+    if a.qlog:
+        cfg.quic_logger = QuicFileLogger(a.qlog)   # one .qlog file per connection
     if a.ticket:
         with open(a.ticket, "rb") as f:
             cfg.session_ticket = pickle.load(f)
@@ -96,4 +99,5 @@ if __name__ == "__main__":
     p.add_argument("--ticket"); p.add_argument("--save-ticket")
     p.add_argument("--zero-rtt", action="store_true")
     p.add_argument("--keylog")
+    p.add_argument("--qlog", help="directory for qlog files (used by M5)")
     asyncio.run(main(p.parse_args()))
